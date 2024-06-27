@@ -1,0 +1,48 @@
+
+{% block content %}
+
+    <div class="row d-flex justify-content-center gap-3 mt-4">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <div class="box title mb-3">
+                <div class="text-center pt-2">
+                    <h1>Favourite Artists</h1>
+                    <h4 class="subtitle">Last {{time_span}}:</h4>
+                </div>
+            </div>
+            <div class="box">
+                <div class="img-container">
+                    <img src="{{first_artist[2]}}" class="image-fluid">
+                    <a href="{{first_artist[1]}}"><h3 class="overlay-text ms-2">1. {{first_artist[0]}}</h3></a>
+                </div>
+                <div class="text-left mt-2 ms-2">
+                    <ol start="2">
+                        {% for artists, url, img  in artist_data_list[1:] %}
+                        <li><a href="{{ url }}" target="_blank">{{ artists }}</a></li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-md-8 col-sm-12 mb-3">
+            <div class="box title mb-3">
+                <div class="text-center pt-2">
+                    <h1>Favourite Tracks</h1>
+                    <h4 class="subtitle">Last {{time_span}}:</h4>
+                </div>
+            </div>
+            <div class="box">
+                <div class="img-container">
+                    <img src="{{first_track[2]}}" class="image-fluid">
+                    <a href="{{first_track[1]}}"><h3 class="overlay-text ms-2">1. {{first_track[0]}}</h3></a>
+                </div>
+                <div class="text-left mt-3 ms-2">
+                    <ol start="2">
+                        {% for tracks, url, img, uri in tracks_data_list[1:] %}
+                        <li><a href="{{ url }}">{{ tracks }}</a></li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

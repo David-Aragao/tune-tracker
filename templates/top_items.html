@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Tune Tracker</title>
+</head>
+<body style="background-color: #121212; color: white;"  >
+
+    <!-- NAV BAR -->
+    <nav class="container-fluid nav-bar sticky-top">
+        <div class="row">
+            <div class="col "></div>
+            <div class="col d-flex justify-content-center"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="" class="logo"></div>
+            <div class="col d-flex justify-content-end"><a href="{{url_for('logout')}}" class="btn btn-custom btn-sm me-3 ">Logout</a></div>
+        </div>
+    </nav>
+    
+
+    <!-- Time span selectors -->
+    <div class="container-fluid d-flex justify-content-center text-center mt-3 ">
+        <div class="row d-flex justify-content-between time-span">
+            <div class="col-lg-4 col-md-12"><a class="btn btn-custom btn-md w-100 mb-3 time-range selected" id="auto-click" href="{{ url_for('get_top_items', time_range='short_term') }}"><span>Last 4 weeks</span></a></div>
+            <div class="col-lg-4 col-md-12"><a class="btn btn-custom btn-md mb-3 w-100 time-range" href="{{ url_for('get_top_items', time_range='medium_term') }}"><span>Last 6 months</span></a></div>
+            <div class="col-lg-4 col-md-12"><a class="btn btn-custom btn-md mb-3 w-100 time-range" href="{{ url_for('get_top_items', time_range='long_term') }}"><span>Last Year</span></a></div>
+        </div>
+    </div>
+    
+    
+    <!-- Content of the page -->
+    <div class="container mt-5 mb-5" id="top-items">
+        <div class="row d-flex justify-content-center gap-3 mt-4">
+            <div class="col-lg-5 col-md-8 col-sm-12">
+                <div class="box title mb-3">
+                    <div class="text-center pt-2">
+                        <h1>Favourite Artists</h1>
+                        <h4 class="subtitle">Last 4 weeks:</h4>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="img-container">
+                        <img src="{{first_artist[2]}}" class="image-fluid">
+                        <a href="{{first_artist[1]}}"><h3 class="overlay-text ms-2">1. {{first_artist[0]}}</h3></a>
+                    </div>
+                    <div class="text-left mt-2 ms-2">
+                        <ol start="2">
+                            {% for artists, url, img in artist_data_list[1:] %}
+                            <li><a href="{{ url }}" target="_blank">{{ artists }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-8 col-sm-12 mb-3">
+                <div class="box title mb-3">
+                    <div class="text-center pt-2">
+                        <h1>Favourite Tracks</h1>
+                        <h4 class="subtitle">Last 4 weeks:</h4>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="img-container">
+                        <img src="{{first_track[2]}}" class="image-fluid">
+                        <a href="{{first_track[1]}}"><h3 class="overlay-text ms-2">1. {{first_track[0]}}</h3></a>
+                    </div>
+                    <div class="text-left mt-3 ms-2">
+                        <ol start="2">
+                            {% for tracks, url, img, uri in tracks_data_list[1:] %}
+                            <li><a href="{{ url }}">{{ tracks }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="row ">
+            <div class="col d-flex flex-column">
+                <p>Create a playlist with your favorite tracks!</p>
+                <button id="create-playlist" class="btn btn-custom btn-md playlist selected"> Create Playlist</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal HTML -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              Playlist created successfully
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+        
+            $('a.time-range').click(function(event)
+            {
+                event.preventDefault(); // Prevent the default action of navigating to the link
+                var url = $(this).attr('href'); // Get the URL from the href attribute
+
+                $('a.time-range').removeClass('selected');
+                // Add 'selected' class to the clicked button
+                $(this).addClass('selected');
+
+                time_range(url);
+            })
+        });
+
+        
+        function time_range(url){
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                        // Update the HTML content of the #top-items element with the response from the server
+                        $('#top-items').html(response);
+                    },
+                    error: function(error) {
+                        console.log('Error:', error);
+                        alert('Failed to retrieve top items');
+                    }
+        
+
+            });
+        }
+
+        document.getElementById('create-playlist').addEventListener('click', function() {
+
+        document.body.style.cursor = 'wait';    
+
+        fetch('/playlist', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json()
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.error) {
+                alert(data.error);
+            } else {
+                var myModal = new bootstrap.Modal(document.getElementById('successModal'));
+                myModal.show();
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Error creating playlist');
+        })
+        .finally(() => {
+        // Revert cursor back to default
+        document.body.style.cursor = 'default';
+        });
+    });
+    </script>
+</body>
+</html>
